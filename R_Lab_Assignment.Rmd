@@ -1,0 +1,315 @@
+---
+title: "DS311 - R Lab Assignment"
+author: "Alfred Ceballos"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: united
+    highlight: tango
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Assignment 1
+
+* In this assignment, we are going to apply some of the build in data set in R for descriptive statistics analysis.
+* To earn full grade in this assignment, students need to complete the coding tasks for each question to get the result.
+* After finished all the questions, knit the document into HTML format for submission.
+
+### Question 1
+
+Using the **mtcars** data set in R, please answer the following questions.
+
+```{r}
+# Loading the data
+data(mtcars)
+
+# Head of the data set
+head(mtcars)
+```
+
+a. Report the number of variables and observations in the data set.
+
+```{r}
+# Enter your code here!
+obs <- nrow(mtcars)
+vars <- ncol(mtcars)
+
+# Answer:
+print(paste("There are total of", vars, "variables and", obs, "observations in this data set."))
+
+```
+
+
+
+b. Print the summary statistics of the data set and report how many discrete and continuous variables are in the data set.
+
+```{r}
+# Enter your code here!
+summary(mtcars)
+
+c_discrete <- 5 
+
+c_continuous <- 6
+
+# Answer:
+print(paste("There are",c_discrete,"discrete variables and", c_continuous, "continuous variables in this data set."))
+
+
+```
+
+
+
+c. Calculate the mean, variance, and standard deviation for the variable **mpg** and assign them into variable names m, v, and s. Report the results in the print statement.
+
+```{r}
+# Enter your code here!
+
+m <- mean(mtcars$mpg)
+v <- var(mtcars$mpg)
+s <- sd(mtcars$mpg)
+
+
+print(paste("The average of Mile Per Gallon from this data set is ", round(m,2) , " with variance ", round(v,2) , " and standard deviation", round(s,2) , "."))
+```
+
+
+
+d. Create two tables to summarize 1) average mpg for each cylinder class and 2) the standard deviation of mpg for each gear class.
+
+```{r}
+# Enter your code here!
+
+install.packages("dplyr", dependencies = TRUE)
+
+# Load necessary library
+library(dplyr)
+
+
+# Convert 'cyl' and 'gear' to factors for categorical grouping
+mtcars$cyl <- as.factor(mtcars$cyl)
+mtcars$gear <- as.factor(mtcars$gear)
+
+# 1) Average MPG for each cylinder class
+avg_mpg_by_cyl <- mtcars %>%
+  group_by(cyl) %>%
+  summarise(average_mpg = round(mean(mpg), 2))
+
+# Display the average MPG by cylinder
+print("Average MPG by Cylinder Class:")
+print(avg_mpg_by_cyl)
+
+# 2) Standard deviation of MPG for each gear class
+sd_mpg_by_gear <- mtcars %>%
+  group_by(gear) %>%
+  summarise(sd_mpg = round(sd(mpg), 2))
+
+# Display the standard deviation of MPG by gear
+print("Standard Deviation of MPG by Gear Class:")
+print(sd_mpg_by_gear)
+
+
+
+
+```
+
+
+
+e. Create a crosstab that shows the number of observations belong to each cylinder and gear class combinations. The table should show how many observations given the car has 4 cylinders with 3 gears, 4 cylinders with 4 gears, etc. Report which combination is recorded in this data set and how many observations for this type of car.
+
+```{r}
+# Enter your code here!
+
+# Create the crosstab
+crosstab <- table(mtcars$cyl, mtcars$gear)
+
+# Display the crosstab
+print(crosstab)
+
+# Find the maximum count in the crosstab
+max_count <- max(crosstab)
+
+# Identify the position (row and column) of the maximum count
+position <- which(crosstab == max_count, arr.ind = TRUE)
+
+# Extract the corresponding cylinder and gear values
+m_common_c <- rownames(crosstab)[position[1]]
+m_common_g <- colnames(crosstab)[position[2]]
+
+print(paste("The most common car type in this data set is car with",m_common_c, " cylinders and", m_common_g, "gears. There are total of",  max_count, "cars belong to this specification in the data set."))
+```
+
+
+*** 
+
+### Question 2
+
+Use different visualization tools to summarize the data sets in this question.
+
+a. Using the **PlantGrowth** data set, visualize and compare the weight of the plant in the three separated group. Give labels to the title, x-axis, and y-axis on the graph. Write a paragraph to summarize your findings.
+
+```{r}
+# Load the data set
+data("PlantGrowth")
+
+# Head of the data set
+head(PlantGrowth)
+
+# Enter your code here!
+# Create a boxplot of weight by group
+boxplot(weight ~ group, data = PlantGrowth,
+        main = "Comparison of Plant Weights by Group",
+        xlab = "Group",
+        ylab = "Weight (grams)",
+        col = c("blue", "green", "orange"))
+
+```
+
+Result:
+
+=> Report a paragraph to summarize your findings from the plot!
+
+In the PlantGrowth dataset, we compared plant weights across these 3 groups: control (ctrl), treatment 1 (trt1), and treatment 2 (trt2). A boxplot visualization revealed that plants in the trt2 group had the highest median weight, indicating better growth under this treatment. The ctrl group showed moderate growth, while the trt1 group had the lowest median weight and greater variability, suggesting less consistent results. Treatment 2 appears to be the most effective in promoting plant growth.
+
+b. Using the **mtcars** data set, plot the histogram for the column **mpg** with 10 breaks. Give labels to the title, x-axis, and y-axis on the graph. Report the most observed mpg class from the data set.
+
+```{r}
+
+# Create a histogram of mpg with 10 breaks
+h <- hist(mtcars$mpg,
+     breaks = 10,
+     main = "Distribution of Miles Per Gallon (mpg)",
+     xlab = "Miles Per Gallon",
+     ylab = "Frequency",
+     col = "lightblue",
+     border = "black")
+
+# Find the index of the maximum count
+max_count_index <- which.max(h$counts)
+
+# Retrieve the corresponding mpg range
+most_common_r <- paste0(h$breaks[max_count_index], " - ", h$breaks[max_count_index + 1])
+
+# Retrieve the count for this range
+m_common_co <- h$counts[max_count_index]
+
+print(paste("Most of the cars in this data set are in the class of", most_common_r, "mile per gallon."))
+
+```
+
+
+
+c. Using the **USArrests** data set, create a pairs plot to display the correlations between the variables in the data set. Plot the scatter plot with **Murder** and **Assault**. Give labels to the title, x-axis, and y-axis on the graph. Write a paragraph to summarize your results from both plots.
+
+```{r}
+# Load the data set
+data("USArrests")
+
+# Head of the data set
+head(USArrests)
+
+# Enter your code here!
+# Create a pairs plot
+pairs(USArrests, main = "Pairs Plot of USArrests Data")
+
+# Create a scatter plot of Murder vs. Assault
+plot(USArrests$Murder, USArrests$Assault,
+     main = "Scatter Plot of Murder vs. Assault",
+     xlab = "Murder Arrests per 100,000",
+     ylab = "Assault Arrests per 100,000",
+     pch = 19, col = "blue")
+
+
+```
+
+Result:
+
+=> Report a paragraph to summarize your findings from the plot!
+
+The pairs plot for the USArrests dataset shows that Murder, Assault, and Rape are positively correlated because high rates in one tend to have high rates in the others. However, UrbanPop has a weaker relationship with the other variables.
+
+The scatter plot of Murder vs. Assault displays a strong upward trend, indicating that states with higher murder arrest rates also tend to have higher assault arrest rates.
+
+***
+
+### Question 3
+
+Download the housing data set from www.jaredlander.com and find out what explains the housing prices in New York City.
+
+Note: Check your working directory to make sure that you can download the data into the data folder. 
+
+```{r, echo=FALSE}
+
+# Create the 'data' directory if it doesn't exist
+if (!dir.exists("data")) {
+  dir.create("data")}
+# Load and clean the housing data set 
+download.file(url='https://www.jaredlander.com/data/housing.csv', destfile='data/housing.csv', mode='wb')
+
+housingData <- subset(housingData, 
+                      select = c("Neighborhood", "Market.Value.per.SqFt", "Boro", "Year.Built"))
+housingData <- na.omit(housingData)                   
+```
+
+a. Create your own descriptive statistics and aggregation tables to summarize the data set and find any meaningful results between different variables in the data set.
+
+```{r}
+# Head of the cleaned data set
+head(housingData)
+
+# Enter your code here!
+summary(housingData$Market.Value.per.SqFt)
+
+aggregate(Market.Value.per.SqFt ~ Boro, data = housingData, FUN = mean)
+
+aggregate(Market.Value.per.SqFt ~ Neighborhood, data = housingData, FUN = mean)
+
+aggregate(Market.Value.per.SqFt ~ Year.Built, data = housingData, FUN = mean)
+
+#The housing dataset reveals that newer properties tend to have higher market values per square foot, indicating a positive relationship between construction year and property value. Additionally, properties located in certain neighborhoods and boroughs exhibit varying average market values, suggesting that location significantly influences property worth. These findings highlight the importance of both property age and location in determining housing prices.
+```
+
+b. Create multiple plots to demonstrates the correlations between different variables. Remember to label all axes and give title to each graph.
+
+```{r}
+# Enter your code here!
+library(ggplot2)
+
+ggplot(housingData, aes(x = Year.Built, y = Market.Value.per.SqFt)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(
+    title = "Market Value per SqFt vs. Year Built",
+    x = "Year Built",
+    y = "Market Value per SqFt"
+  )
+
+ggplot(housingData, aes(x = Boro, y = Market.Value.per.SqFt)) +
+  geom_boxplot(fill = "lightblue", color = "darkblue") +
+  labs(
+    title = "Distribution of Market Value per SqFt by Borough",
+    x = "Borough",
+    y = "Market Value per SqFt"
+  )
+
+ggplot(housingData, aes(x = Neighborhood, y = Market.Value.per.SqFt)) +
+  geom_boxplot(fill = "lightgreen", color = "darkgreen") +
+  labs(
+    title = "Distribution of Market Value per SqFt by Neighborhood",
+    x = "Neighborhood",
+    y = "Market Value per SqFt"
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+```
+
+c. Write a summary about your findings from this exercise.
+
+
+=> Enter your answer here!
+
+The box plots analyzing market value per square foot across boroughs and neighborhoods reveal notable disparities in housing prices. Certain boroughs exhibit higher median values, indicating more expensive real estate markets, while others show lower medians, suggesting more affordable housing options. Similarly, at the neighborhood level, some areas stand out with significantly higher or lower property values compared to others. These variations underscore the substantial impact of location on property valuation, highlighting the importance of geographic factors in the housing market.
